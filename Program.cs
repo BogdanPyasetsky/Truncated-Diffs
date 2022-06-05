@@ -11,7 +11,9 @@ namespace Truncated_Diffs
 {
     internal class Program
     {
+        ////////////////////////////////////////////////
         //////////// Midori64 and Midori128 ////////////
+        ////////////////////////////////////////////////
 
         private static int[] Sb0 = new int[16] { 0xc, 0xa, 0xd, 0x3, 0xe, 0xb, 0xf, 0x7, 0x8, 0x9, 0x1, 0x5, 0x0, 0x2, 0x4, 0x6 };
         private static int[] Sb1 = new int[16] { 0x1, 0x0, 0x5, 0x3, 0xe, 0x2, 0xf, 0x7, 0xd, 0xa, 0x9, 0xb, 0xc, 0x8, 0x4, 0x6 };
@@ -46,7 +48,7 @@ namespace Truncated_Diffs
 
             int[] FHalf = new int[n];
             int[] SHalf = new int[n];
-            int[]Sum = new int[n];
+            int[] Sum = new int[n];
 
             for (int i = 0; i < n; i++)
             {
@@ -76,12 +78,12 @@ namespace Truncated_Diffs
 
 
 
-        static int[] KeyAdd (int[] state, int[] key, int iteration)
+        static int[] KeyAdd(int[] state, int[] key, int iteration)
         {
             if (iteration == -1)
             {
                 for (int i = 0; i < 16; i++)
-                    state[i] = state[i] ^ key[i];  
+                    state[i] = state[i] ^ key[i];
             }
             else
             {
@@ -105,7 +107,7 @@ namespace Truncated_Diffs
             return NewState;
         }
 
-        static int SSb0 (int cell)
+        static int SSb0(int cell)
         {
             int[] newIdx = new int[8] { 4, 1, 6, 3, 0, 5, 2, 7 };
             int[] bit = new int[8];
@@ -169,7 +171,7 @@ namespace Truncated_Diffs
         {
             int[] newIdx = new int[8] { 1, 6, 7, 0, 5, 2, 3, 4 };
             int[] newIdxRev = new int[8] { 3, 0, 5, 6, 7, 4, 1, 2 };
-            int[] bit = new int[8];      
+            int[] bit = new int[8];
             int[] newBit = new int[8];
             int tempCell = 0;
             int resCell = 0;
@@ -227,7 +229,7 @@ namespace Truncated_Diffs
         }
 
         static int SSb2(int cell)
-        {   
+        {
             int[] newIdx = new int[8] { 2, 3, 4, 1, 6, 7, 0, 5 };
             int[] newIdxRev = new int[8] { 6, 3, 0, 1, 2, 7, 4, 5 };
             int[] bit = new int[8];
@@ -288,7 +290,7 @@ namespace Truncated_Diffs
         }
 
         static int SSb3(int cell)
-        {                             
+        {
             int[] newIdx = new int[8] { 7, 4, 1, 2, 3, 0, 5, 6 };
             int[] newIdxRev = new int[8] { 5, 2, 3, 4, 1, 6, 7, 0 };
             int[] bit = new int[8];
@@ -377,7 +379,7 @@ namespace Truncated_Diffs
         {
             int[] cell = new int[State.Length];
             for (int i = 0; i < 16; i++)
-            { 
+            {
                 cell[i] = State[i];
             }
             for (int i = 0; i < 4; i++)
@@ -416,9 +418,9 @@ namespace Truncated_Diffs
             string Y = "";
             for (int i = 0; i < 16; i++)
             {
-                Y = Y +Convert.ToString(res[i], 16);
+                Y = Y + Convert.ToString(res[i], 16);
             }
-            return Y;   
+            return Y;
         }
 
         static string Midori128Core(string plainText, int[] WK)
@@ -441,15 +443,28 @@ namespace Truncated_Diffs
             string Y = "";
             for (int i = 0; i < 16; i++)
             {
-                Y = Y + Convert.ToString( (res[i] & 0xf0) >> 4, 16);
+                Y = Y + Convert.ToString((res[i] & 0xf0) >> 4, 16);
                 Y = Y + Convert.ToString((res[i] & 0x0f), 16);
             }
             return Y;
         }
 
 
-
+        ////////////////////////////////////////////////
         //////////// Truncated Differetials ////////////
+        ////////////////////////////////////////////////
+
+
+        private static string[] trunc4BitDiffs = new string[65] {"0004",   "0040",   "0400",   "4000",  "0014",   "0041",   "0401",   "4001",
+                                             "0104",   "0140",   "0410",   "4010",  "0114",   "0141",   "0411",   "4011",
+                "1004",   "1040",   "1400",   "4100", "1014",   "1041",   "1401",   "4101", "1104",   "1140",   "1410",
+                "4110", "1114",  "1141",   "1411",   "4111", "0044",   "0404",   "4004",   "0440",   "4040",   "4400",
+                "0144",   "0414",   "4014",   "0441",   "4041",   "4401", "1044",   "1404",   "4104",   "1440",   "4140", "4410",
+                "1144",   "1414",   "4114",   "1441",   "4141",   "4411", "0444",   "4044",   "4404",   "4440", "1444",   "4144",
+                "4414",   "4441", "4444"};
+        private static string[] _4BitDiffs = new string[16] {
+        "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111" };
+
 
         static List<int> findSubArray4Bit(int[] array)
         {
@@ -457,13 +472,13 @@ namespace Truncated_Diffs
             int mask;
             for (int i = 0; i <= 0xf; i++) // filling list with all possiible vlues
                 subArray.Add(i);
-            for(int i = 0; i < 4; i++) // removing all instances that don't match to the chosen bit
+            for (int i = 0; i < 4; i++) // removing all instances that don't match to the chosen bit
             {
                 if (array[i] == 0 || array[i] == 1)
                 {
                     mask = 1 << (3 - i);
                     subArray.RemoveAll(item => ((item & mask) >> (3 - i)) != array[i]);
-                    
+
                 }
             }
 
@@ -497,14 +512,14 @@ namespace Truncated_Diffs
             int counterX = 0, counterA;
             List<int> subAlpha = findSubArray4Bit(alpha);  // possible alpha & beta
             List<int> subBeta = findSubArray4Bit(beta);
-            
+
             for (int x = 0; x <= 0xf; x++)
             {
                 counterA = 0;
                 foreach (int a in subAlpha)
                 {
-                    if (subBeta.Exists(b => Sb0[x ^ a] == (Sb0[x] ^ b) ))
-                        counterA++;                        
+                    if (subBeta.Exists(b => Sb0[x ^ a] == (Sb0[x] ^ b)))
+                        counterA++;
                 }
                 if (counterA == subAlpha.Count)
                     counterX++;
@@ -546,7 +561,7 @@ namespace Truncated_Diffs
             int[] betaFirst = new int[4];
             int[] betaSecond = new int[4];
 
-            for (int i = 0; i < 8; i++ ) // applying permutation
+            for (int i = 0; i < 8; i++) // applying permutation
             {
                 alphaTrue[i] = alphaInput[newIdx[i]];
                 betaTrue[i] = betaInput[newIdx[i]];
@@ -558,7 +573,7 @@ namespace Truncated_Diffs
                 betaFirst[i] = betaTrue[i];
                 betaSecond[i] = betaTrue[4 + i];
             }
-            res = TDPforSb1(alphaFirst,betaFirst) * TDPforSb1(alphaSecond,betaSecond);
+            res = TDPforSb1(alphaFirst, betaFirst) * TDPforSb1(alphaSecond, betaSecond);
 
             return res;
         }
@@ -606,28 +621,28 @@ namespace Truncated_Diffs
             double result = 1;
             int[] alphaCell = new int[4]; // midori64's cell
             int[] betaCell = new int[4];
-            for (int i = 0; i < 16; i++ )
+            for (int i = 0; i < 16; i++)
             {
                 Array.Clear(alphaCell, 0, alphaCell.Length);
                 Array.Clear(betaCell, 0, betaCell.Length);
                 for (int j = 0; j < 4; j++) // copies the bits needed for i-th SBox 
                 {
                     alphaCell[j] = alphaInput[i * 4 + j];
-                    betaCell[j] = betaInputIncorrect[i * 4 + j];    
+                    betaCell[j] = betaInputIncorrect[i * 4 + j];
                 }
-                result = result * TDPforSb0(alphaCell, betaCell); 
+                result = result * TDPforSb0(alphaCell, betaCell);
             }
-            
+
             return result;
         }
 
         static int[] ConvertToBits(string input) // returns an array of bits
         {
             int size = input.Length;
-            int[] result  = new int[size];
+            int[] result = new int[size];
             for (int i = 0; i < size; i++)
             {
-                result[i] = Convert.ToInt32("0x" + input[i],16);
+                result[i] = Convert.ToInt32("0x" + input[i], 16);
             }
             return result;
         }
@@ -635,27 +650,28 @@ namespace Truncated_Diffs
         static void TDDT4Bits() // print TDDT
         {
             //int[] bits = new int[3] { 0, 1, 4 };
-            string[] diffs = new string[65] {"0004",   "0040",   "0400",   "4000",  "0014",   "0041",   "0401",   "4001",
+            /*string[] diffs = new string[65] {"0004",   "0040",   "0400",   "4000",  "0014",   "0041",   "0401",   "4001",
                                              "0104",   "0140",   "0410",   "4010",  "0114",   "0141",   "0411",   "4011",
                 "1004",   "1040",   "1400",   "4100", "1014",   "1041",   "1401",   "4101", "1104",   "1140",   "1410",   
                 "4110", "1114",  "1141",   "1411",   "4111", "0044",   "0404",   "4004",   "0440",   "4040",   "4400",
                 "0144",   "0414",   "4014",   "0441",   "4041",   "4401", "1044",   "1404",   "4104",   "1440",   "4140", "4410",
                 "1144",   "1414",   "4114",   "1441",   "4141",   "4411", "0444",   "4044",   "4404",   "4440", "1444",   "4144",   
                 "4414",   "4441", "4444"};
+            */
             int[] a = new int[4];
             int[] b = new int[4];
 
             using (StreamWriter sw = File.CreateText("Sb0.txt"))
             {
-                for (int ai = 0; ai < diffs.Length; ai++)
+                for (int ai = 0; ai < trunc4BitDiffs.Length; ai++)
                 {
-                    sw.Write(diffs[ai]);
-                    for (int bi = 0; bi < diffs.Length; bi++)
+                    sw.Write(trunc4BitDiffs[ai]);
+                    for (int bi = 0; bi < trunc4BitDiffs.Length; bi++)
                     {
-                        sw.Write(String.Format("{0,10:D}", TDPforSb0(ConvertToBits(diffs[ai]), ConvertToBits(diffs[bi])).ToString())); sw.Write("  ");
+                        sw.Write(String.Format("{0,10:D}", TDPforSb0(ConvertToBits(trunc4BitDiffs[ai]), ConvertToBits(trunc4BitDiffs[bi])).ToString())); sw.Write("  ");
                     }
                     sw.Write("\n");
-                    Console.WriteLine(diffs[ai]);
+                    Console.WriteLine(trunc4BitDiffs[ai]);
                 }
             }
         }
@@ -674,13 +690,13 @@ namespace Truncated_Diffs
         }
         */
 
-        static int[] findTruncatedDiff (List<int> diffs)
+        static int[] findTruncatedDiff(List<int> diffs)
         {
             int[][] bitDiffs = new int[diffs.Count][];
             int[] result = new int[4] { 0, 0, 0, 0 };
             for (int i = 0; i < diffs.Count; i++)
-                bitDiffs[i] = new int[4] ; 
-            for(int i = 0; i < diffs.Count; i++)
+                bitDiffs[i] = new int[4];
+            for (int i = 0; i < diffs.Count; i++)
             {
                 bitDiffs[i][0] = (diffs[i] & 0x8) >> 3;
                 bitDiffs[i][1] = (diffs[i] & 0x4) >> 2;
@@ -692,7 +708,7 @@ namespace Truncated_Diffs
                 result[2] = result[2] + bitDiffs[i][2];
                 result[3] = result[3] + bitDiffs[i][3];
             }
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 if (result[i] != 0 && result[i] != diffs.Count)
                     result[i] = 4;
@@ -703,7 +719,98 @@ namespace Truncated_Diffs
             return result;
         }
 
-        static Dictionary<string, double>TDPforM16_alpha(string alphaInput)
+        static Dictionary<string, double> TDPforM16_alpha(string alphaInput) // alphaInput string of 16 bits
+        {
+            Dictionary<string, double> result = new Dictionary<string, double>();
+            List<string> diffs = trunc4BitDiffs.ToList(); // printing all diffs
+            for (int i = 0; i < 16; i++)
+                diffs.Add(_4BitDiffs[i]);
+            Dictionary<string, double>[] betaCell =
+            {
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
+            };
+            int[] alpha = ConvertToBits(alphaInput);
+            int[] bits = new int[4];
+            double cellProbability;
+            
+            // finding all possible betas for each alphaCell
+            for (int cell = 0; cell < 4; cell++)
+            {
+                for (int i = 0; i < 4; i++) // filling bits needed for i-th cell
+                {
+                    bits[i] = alpha[cell * 4 + i];
+                }
+                foreach (string beta in diffs)
+                {
+                    cellProbability = TDPforSb0(bits, ConvertToBits(beta));
+                    if (cellProbability > 0)
+                        betaCell[cell].Add(beta, cellProbability);
+                }
+            }
+            // combinning all betaCells together
+            Dictionary<string, double> betaTemp = new Dictionary<string, double>();
+            foreach(var pair0 in betaCell[0])
+            {
+                foreach (var pair1 in betaCell[1])
+                {
+                    foreach (var pair2 in betaCell[2])
+                    {
+                        foreach (var pair3 in betaCell[3])
+                        {
+                            betaTemp.Add(pair0.Key + pair1.Key + pair2.Key + pair3.Key, pair0.Value * pair1.Value * pair2.Value * pair3.Value);
+                        }
+                    }
+                }
+                
+            }
+           
+
+            int[] betaTempBits = new int[16];
+            int[] betaBits = new int[16];
+            string betaString;
+
+            foreach (var pair in betaTemp)
+            {
+                betaString = "";
+                betaTempBits = ConvertToBits(pair.Key);
+                for (int i = 0; i < 4; i++) // applying MixColumn
+                {
+                    betaBits[i] = betaTempBits[i + 4] + betaTempBits[i + 8] + betaTempBits[i + 12];
+                    betaBits[i + 4] = betaTempBits[i] + betaTempBits[i + 8] + betaTempBits[i + 12];
+                    betaBits[i + 8] = betaTempBits[i] + betaTempBits[i + 4] + betaTempBits[i + 12];
+                    betaBits[i + 12] = betaTempBits[i] + betaTempBits[i + 4] + betaTempBits[i + 8];
+                }
+                for (int i = 0; i < betaBits.Length; i++)
+                {
+                    if (betaBits[i] > 3)
+                        betaBits[i] = 4;
+                    else
+                        betaBits[i] = betaBits[i] & 0x1;
+                    betaString += Convert.ToString(betaBits[i]);
+                }
+                if (result.ContainsKey(betaString) == true)
+                    result[betaString] = Math.Max(pair.Value, result[betaString]);
+                else
+                    result.Add(betaString, pair.Value);
+            }
+            int bt = betaTemp.Count();
+            betaTemp.Clear();
+
+            double limit = 0.015;
+            foreach(var pair in result)
+            {
+                if (pair.Value >= limit)
+                    betaTemp.Add(pair.Key, pair.Value);
+            }
+
+           return betaTemp;            
+        }
+
+        /*
+        static Dictionary<string, double> wrong_TDPforM16_alpha(string alphaInput) // alphaInput string of 16 bits
         {
             Dictionary<string, double> result = new Dictionary<string,double>();
             int[] alpha = ConvertToBits(alphaInput);
@@ -711,7 +818,8 @@ namespace Truncated_Diffs
             int[] beta = new int[alpha.Length];
             List<int> alphaCellSubarray = new List<int>();
             List<int> betaCellSubarray = new List<int>();
-            double probability = 0;
+            string betaString = "";
+            double probability = 1;
             int[] bits = new int[4];
             for(int cell = 0; cell < 4; cell++)
             {
@@ -733,13 +841,29 @@ namespace Truncated_Diffs
                 probability *= TDPforSb0(bits, betaCell); // updating TDP                
             }
 
-            // застосувати МіксКолумс до бетаТемп
-
+            // applaying MixColumn to beta
+            for (int i = 0; i < 4; i++)
+            {
+                beta[i] = betaTemp[i + 4] + betaTemp[i + 8] + betaTemp[i + 12];
+                beta[i + 4] = betaTemp[i] + betaTemp[i + 8] + betaTemp[i + 12];
+                beta[i + 8] = betaTemp[i] + betaTemp[i + 4] + betaTemp[i + 12];
+                beta[i + 12] = betaTemp[i] + betaTemp[i + 4] + betaTemp[i + 8];
+            }
+            for (int i = 0; i < beta.Length; i++)
+            {
+                if (beta[i] > 3)
+                    beta[i] = 4;
+                else
+                    beta[i] = beta[i] & 0x1;
+                betaString += Convert.ToString(beta[i]);
+            }
+            result.Add(betaString, probability);
 
 
             return result;
         }
 
+        */
 
 
 
@@ -749,23 +873,24 @@ namespace Truncated_Diffs
 
 
 
-
-        // unknown bits denoted as 4 or more 
-
-
+        // unknown bits are denoted as 4 or more 
         static void Main(string[] args)
         {
 
-            int[] a = { 4, 4, 4, 4 };//, 1, 0, 0, 0 };
+            //int[] a = { 4, 4, 4, 4 };//, 1, 0, 0, 0 };
             //int[] b = { 4, 0, 0, 4, 1, 0, 4, 4 };
             //TDDT4Bits();
             //var t = TDPforSSb0(a, b);
             //var y = findSubArray4Bit(a);
-            var subarray = findSubArray4Bit(a);
-            var res = findTruncatedDiff(subarray);
-            
-            
-            
+            //var subarray = findSubArray4Bit(a);
+            //var res = findTruncatedDiff(subarray);
+            string input = "1100101401001011";
+            string input1 = "4444444444444444";
+
+            var t = TDPforM16_alpha(input);
+
+            //Console.WriteLine(t.Count);
+
 
             Console.WriteLine("end");
             Console.ReadKey();
