@@ -483,27 +483,7 @@ namespace Truncated_Diffs
             return subArray;
         }
 
-        /*
-        static List<int> findSubArray8Bit(int[] array)
-        {
-            List<int> subArray = new List<int>();
-            int mask;
-            for (int i = 0; i <= 0xff; i++) // filling list with all possiible vlues
-                subArray.Add(i);
-            for (int i = 0; i < 8; i++) // removing all instances that don't match to the chosen bit
-            {
-                if (array[i] == 0 || array[i] == 1)
-                {
-                    mask = 1 << (7 - i);
-                    subArray.RemoveAll(item => ((item & mask) >> (7 - i)) != array[i]);
-
-                }
-            }
-
-            return subArray;
-        }
-        */
-
+       
         static double TDPforSb0(int[] alpha, int[] beta)
         {
             double res;
@@ -576,71 +556,6 @@ namespace Truncated_Diffs
             return res;
         }
 
-        /*
-        static int[] UpdateBeta64Bit(int[] beta)
-        {
-            int[] NewIdxs = new int[16] { 0, 10, 5, 15, 14, 4, 11, 1, 9, 3, 12, 6, 7, 13, 2, 8 };
-            int[] betaTemp = new int[64];
-            int[] betaUpdated = new int[64];
-            for (int i = 0; i < 16; i++) // using ShuffleCell on beta's bits
-            {
-                betaTemp[i * 4] = beta[NewIdxs[i] * 4];
-                betaTemp[i * 4 + 1] = beta[NewIdxs[i] * 4 + 1];
-                betaTemp[i * 4 + 2] = beta[NewIdxs[i] * 4 + 2];
-                betaTemp[i * 4 + 3] = beta[NewIdxs[i] * 4 + 3];
-            }
-
-            for (int i = 0; i < 4; i++) // using MixColumns on beta's bits
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    betaUpdated[i * 16 + j] = betaTemp[16 * i + j + 4] + betaTemp[16 * i + j + 8] + betaTemp[16 * i + j + 12];
-                    betaUpdated[i * 16 + j + 4] = betaTemp[16 * i + j] + betaTemp[16 * i + j + 8] + betaTemp[16 * i + j + 12];
-                    betaUpdated[i * 16 + j + 8] = betaTemp[16 * i + j] + betaTemp[16 * i + j + 4] + betaTemp[16 * i + j + 12];
-                    betaUpdated[i * 16 + j + 12] = betaTemp[16 * i + j] + betaTemp[16 * i + j + 4] + betaTemp[16 * i + j + 8];
-                }
-            }
-
-            for (int i = 0; i < betaUpdated.Length; i++)
-            {
-                if (betaUpdated[i] > 3)
-                    betaUpdated[i] = 4;
-                else
-                    betaUpdated[i] = betaUpdated[i] & 0x1;
-            }
-
-            return betaUpdated;
-
-        }
-
-
-
-
-
-        static double TDPforM64(int[] alphaInput, int[] betaInputIncorrect) // calculates TDP for Midori64 and finds beta's correct value
-        {
-            // alphaInput.length == betaInputIncorrect.length == 64
-            double result = 1;
-            int[] alphaCell = new int[4]; // midori64's cell
-            int[] betaCell = new int[4];
-            for (int i = 0; i < 16; i++)
-            {
-                Array.Clear(alphaCell, 0, alphaCell.Length);
-                Array.Clear(betaCell, 0, betaCell.Length);
-                for (int j = 0; j < 4; j++) // copies the bits needed for i-th SBox 
-                {
-                    alphaCell[j] = alphaInput[i * 4 + j];
-                    betaCell[j] = betaInputIncorrect[i * 4 + j];
-                }
-                result = result * TDPforSb0(alphaCell, betaCell);
-            }
-
-            return result;
-        }
-
-        */
-
-
 
         static int[] ConvertToBits(string input) // returns an array of bits
         {
@@ -655,26 +570,35 @@ namespace Truncated_Diffs
 
         static void TDDT4Bits() // print TDDT
         {
-            using (StreamWriter sw = File.CreateText("Sb0.txt"))
+            List<string> diffs4Bit = _4BitDiffs.ToList(); // printing all diffs
+            for (int i = 0; i < trunc4BitDiffs.Length; i++)
+                diffs4Bit.Add(trunc4BitDiffs[i]);
+            using (StreamWriter sw = File.CreateText("Sb1(1).txt"))
             {
-                for (int ai = 0; ai < trunc4BitDiffs.Length; ai++)
+                int n;
+                double probability; 
+                                
+                foreach (var alpha in diffs4Bit)
                 {
-                    sw.Write(trunc4BitDiffs[ai]);
-                    for (int bi = 0; bi < trunc4BitDiffs.Length; bi++)
+
+                    sw.WriteLine("-------------" + alpha + "-------------");
+                    foreach (var beta in diffs4Bit)
                     {
-                        sw.Write(String.Format("{0,10:D}", TDPforSb0(ConvertToBits(trunc4BitDiffs[ai]), ConvertToBits(trunc4BitDiffs[bi])).ToString())); sw.Write("  ");
-                    }
-                    sw.Write("\n");
-                    Console.WriteLine(trunc4BitDiffs[ai]);
+                        probability = TDPforSb1(ConvertToBits(alpha), ConvertToBits(beta));
+                        if (probability > 0)
+                            sw.WriteLine(beta + "   " + probability);
+                    }                   
+                
                 }
+                
             }
         }
 
-        static void TDDT8bits() // print TDDT
+        static void TDDT8Bits() // print TDDT
         {
-            List<string> diffs4Bit = trunc4BitDiffs.ToList(); // printing all diffs
-            for (int i = 0; i < 16; i++)
-                diffs4Bit.Add(_4BitDiffs[i]);
+            List<string> diffs4Bit = _4BitDiffs.ToList(); // printing all diffs
+            for (int i = 0; i < trunc4BitDiffs.Length; i++)
+                diffs4Bit.Add(trunc4BitDiffs[i]);
             List<string> diffs8Bit = new List<string>();
             List<string> truncDiffs8Bit = new List<string>();
             double probability;
@@ -687,30 +611,37 @@ namespace Truncated_Diffs
                 }
             }
 
+            
             foreach(var item in diffs8Bit)
             {
                 if (item.Contains("4"))
                     truncDiffs8Bit.Add(item);
             }
+            
 
             int t = 0;
-            using (StreamWriter sw = File.CreateText("SSb0.txt"))
+            int counter = 0;
+            using (StreamWriter sw = File.CreateText("SSb0(1).txt"))
             {
                 foreach (var alpha in truncDiffs8Bit)
                 {
+                    sw.WriteLine("-------------" + alpha + "-------------");
                     foreach (var beta in truncDiffs8Bit)
                     {
                         probability = TDPforSSb0(ConvertToBits(alpha), ConvertToBits(beta));
                         if (probability > 0)
-                            sw.WriteLine(alpha + "   " + beta + "   " + probability);
+                        {
+                            sw.WriteLine(beta + "   " + probability);
+                            counter++;
+                        }
                     }
                     Console.WriteLine(t + "  out of  " + truncDiffs8Bit.Count);
                     t++;
                 }
             }
 
-
-
+            Console.WriteLine("#non 0  " + counter);
+            
         }
 
 
@@ -747,7 +678,7 @@ namespace Truncated_Diffs
 
 
 
-        static Dictionary<string, double> TDPforM16_alpha(string alphaInput , double limit) // alphaInput string of 16 bits
+        static Dictionary<string, double> TDPforM16_alpha(string alphaInput) // alphaInput string of 16 bits
         {
             Dictionary<string, double> result = new Dictionary<string, double>();
             List<string> diffs = trunc4BitDiffs.ToList(); // printing all 4 bit diffs
@@ -824,24 +755,20 @@ namespace Truncated_Diffs
                 else
                     result.Add(betaString, pair.Value);
             }
-            int bt = betaTemp.Count();
-            betaTemp.Clear();
 
-            //double limit = 0.015;
-            foreach(var pair in result)
-            {
-                if (pair.Value >= limit)
-                    betaTemp.Add(pair.Key, pair.Value);
-            }
-
-           return betaTemp;            
+            return result;           
         }
 
 
         static Dictionary<string, double> DifferentialSearch(string alphaInput, int depth, double[] limits)
         {
-            Dictionary<string, double>[] gamma = 
-            { 
+            Dictionary<string, double>[] gamma =
+            {
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
+                new Dictionary<string, double>(),
                 new Dictionary<string, double>(),
                 new Dictionary<string, double>(),
                 new Dictionary<string, double>(),
@@ -854,42 +781,44 @@ namespace Truncated_Diffs
             List<string> keys = new List<string>();
             double probabilityTemp;
 
-            gamma[0] = TDPforM16_alpha(alphaInput, limits[0]); // filling the first layer
+            gamma[0] = TDPforM16_alpha(alphaInput); // filling the first layer
+            keys = gamma[0].Keys.ToList();
+            foreach (string key in keys)
+            {
+                if (gamma[0][key] <= limits[0])
+                    gamma[0].Remove(key);
+            }
 
-           
 
             // filling remaining layers
             for (int t = 1; t < depth; t++)
             {
-                keysPrev.Clear();  keysPrev = gamma[t - 1].Keys.ToList(); // savin all betas from previous layer
-                
+                keysPrev.Clear(); keysPrev = gamma[t - 1].Keys.ToList(); // savin all betas from previous layer
+
                 foreach (var KeyPrev in keysPrev)
                 {
-                    gammaTemp.Clear(); 
-                    gammaTemp = TDPforM16_alpha(KeyPrev, limits[t]); // for each key finding all possible routes
-                    //keysTemp = gammaTemp.Keys.ToList();
+                    gammaTemp.Clear();
+                    gammaTemp = TDPforM16_alpha(KeyPrev); // for each key finding all possible routes
+
                     foreach (var pair in gammaTemp) // updating dictionary gamma[t] keys and values
                     {
                         probabilityTemp = gamma[t - 1][KeyPrev] * pair.Value;
                         if (gamma[t].ContainsKey(pair.Key))
                             gamma[t][pair.Key] = Math.Max(probabilityTemp, pair.Value);
-                        //gamma[t][pair.Key] += probabilityTemp; // можливо треба буде брати максимум
                         else
                             gamma[t].Add(pair.Key, probabilityTemp);
                     }
                 }
+                keys.Clear(); keys = gamma[t].Keys.ToList();
+                foreach (string key in keys)
+                {
+                    if (gamma[t][key] <= limits[t])
+                        gamma[t].Remove(key);
+                }
+
             }
-
-            return gamma[depth - 1];
+                return gamma[depth - 1];            
         }
-
-
-
-
-  
-
-
-
 
 
 
@@ -900,18 +829,25 @@ namespace Truncated_Diffs
         static void Main(string[] args)
         {
 
-            /*
-            string input = "1100101401001011";
-            double[] limits = { 0.002, 0.0015, 0.0001, 0.0003 };
-            var y = DifferentialSearch(input, 4, limits);
-            */
+            //string input = "1000000000000004";
+            //double[] limits = { 0.002, 0.002, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001 };
 
-            //Console.WriteLine(t.Count);
 
-            //TDDT8bits();
+            string input = "0000000000000001";
+            double[] limits = { 0.2, 0.04, 0.002, 0.00001, 0.00003, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001 };
 
-            Console.WriteLine("end");
-            Console.ReadKey();
+
+            var dsr = DifferentialSearch(input, 3, limits);
+
+            using (StreamWriter sw = File.CreateText("input_0000000000000001_d3.txt"))
+            {
+                foreach (var pair in dsr)
+                {
+                    sw.WriteLine(pair.Key + "   " + pair.Value);
+                }
+
+            }
+                                   
         }
     }
 }
